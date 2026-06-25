@@ -1,174 +1,64 @@
-# لوحة المهام المشتركة على Netlify
+# اختبار Netlify Blobs
 
-مشروع بسيط لإدارة المهام بكلمة مرور واحدة مشتركة.
+هذا مشروع صغير جدًا لاختبار Netlify Blobs فقط.
 
-أي شخص يملك كلمة المرور يستطيع:
+## ماذا يفعل؟
 
-- مشاهدة كل المهام
-- إضافة مهمة
-- تعديل أي مهمة
-- حذف أي مهمة
-- تغيير حالة أي مهمة
+- يحفظ نصًا بسيطًا في Netlify Blobs.
+- يقرأ النص المحفوظ.
+- يحذف النص المحفوظ.
 
-## مكونات المشروع
-
-- واجهة عربية جاهزة داخل مجلد `public`
-- دالة تسجيل الدخول داخل `netlify/functions/auth.js`
-- دالة إدارة المهام داخل `netlify/functions/tasks.js`
-- حفظ المهام باستخدام Netlify Blobs
-- لا يوجد مستخدمون ولا صلاحيات ولا مدير مهام
-
-## كلمة المرور الافتراضية
-
-كلمة المرور الافتراضية للتجربة:
+## الملفات المهمة
 
 ```txt
-team123
+public/index.html
+netlify/functions/blob-test.mjs
+netlify.toml
+package.json
 ```
 
-مهم جدًا: غيّر كلمة المرور من إعدادات Netlify قبل استخدام الموقع فعليًا.
+## طريقة النشر
 
-## طريقة النشر الأسهل
-
-الأفضل نشر المشروع عن طريق GitHub أو Netlify CLI، لأن المشروع يحتوي على Netlify Functions.
-
-### الطريقة الأولى: GitHub
-
-1. ارفع ملفات المشروع إلى مستودع GitHub جديد.
-2. افتح Netlify.
-3. اختر Add new site.
-4. اختر Import an existing project.
-5. اربط المستودع.
-6. تأكد أن الإعدادات كالتالي:
+1. ارفع هذا المشروع إلى GitHub.
+2. في Netlify اختر Add new project.
+3. اختر Import from GitHub.
+4. اختر المستودع.
+5. تأكد من الإعدادات التالية:
 
 ```txt
-Build command: اتركه فارغًا
+Build command: npm run build
 Publish directory: public
 Functions directory: netlify/functions
 ```
 
-7. من إعدادات الموقع في Netlify أضف Environment Variables:
+6. انشر الموقع.
+7. افتح الرابط واضغط حفظ، ثم قراءة، ثم حذف.
+
+## إذا ظهر خطأ environment
+
+إذا ظهرت رسالة مثل:
 
 ```txt
-SHARED_PASSWORD=اكتب-كلمة-مرور-قوية
-JWT_SECRET=اكتب-نص-سري-طويل
+The environment has not been configured to use Netlify Blobs
 ```
 
-8. اضغط Deploy.
-
-### الطريقة الثانية: Netlify CLI
-
-من داخل مجلد المشروع شغّل:
-
-```bash
-npm install
-npx netlify login
-npx netlify init
-npx netlify deploy --prod
-```
-
-ثم أضف المتغيرات من لوحة Netlify:
+أضف متغيرات البيئة التالية في Netlify:
 
 ```txt
-SHARED_PASSWORD=اكتب-كلمة-مرور-قوية
-JWT_SECRET=اكتب-نص-سري-طويل
+NETLIFY_SITE_ID=Project ID
+NETLIFY_AUTH_TOKEN=Personal Access Token
 ```
 
-ثم أعد النشر:
+ثم أعد النشر.
 
-```bash
-npx netlify deploy --prod
-```
+## أين أجد Project ID؟
 
-## ملاحظة مهمة عن السحب والإفلات
-
-رفع ملفات الواجهة بالسحب والإفلات قد ينشر الموقع كصفحات ثابتة فقط، لكنه قد لا ينشر Netlify Functions. لذلك استخدم GitHub أو Netlify CLI.
-
-## تعديل اسم الموقع
-
-يمكنك تعديل الاسم من ملف:
+من داخل Netlify:
 
 ```txt
-public/index.html
+Project configuration > General > Project information > Project ID
 ```
 
-ابحث عن:
+## ملاحظة
 
-```txt
-لوحة المهام المشتركة
-```
-
-وقم بتغييرها للاسم الذي تريده.
-
-## تعديل الألوان
-
-الألوان موجودة في بداية ملف:
-
-```txt
-public/styles.css
-```
-
-داخل `:root`.
-
-## هيكلة الملفات
-
-```txt
-netlify-shared-task-dashboard/
-├─ public/
-│  ├─ index.html
-│  ├─ styles.css
-│  └─ app.js
-├─ netlify/
-│  └─ functions/
-│     ├─ auth.js
-│     └─ tasks.js
-├─ netlify.toml
-├─ package.json
-├─ .env.example
-└─ README_AR.md
-```
-
-## تنبيه أمني بسيط
-
-هذا النظام بسيط ومناسب لفريق صغير. لا تستخدمه لتخزين معلومات حساسة جدًا. كل من يعرف كلمة المرور يستطيع إدارة كل المهام.
-
-## إصلاح خطأ Netlify Blobs Environment
-
-إذا ظهرت الرسالة التالية:
-
-```txt
-The environment has not been configured to use Netlify Blobs. To use it manually, supply the following properties when creating a store: siteID, token
-```
-
-فالسبب غالبًا أن Netlify Functions تعمل بصيغة Lambda compatibility، وفي هذه الحالة يجب تهيئة Netlify Blobs داخل الدالة قبل استخدام `getStore`. تم تعديل ملف:
-
-```txt
-netlify/functions/tasks.js
-```
-
-ليستخدم `connectLambda(event)` تلقائيًا داخل الدالة.
-
-### خطوات الإصلاح بعد رفع هذه النسخة
-
-1. ارفع النسخة الجديدة إلى GitHub بدل القديمة.
-2. ادخل إلى Netlify.
-3. افتح تبويب Deploys.
-4. اضغط Trigger deploy ثم Deploy site.
-5. جرّب إضافة مهمة جديدة.
-
-### إعدادات Environment Variables المطلوبة
-
-تأكد من وجود:
-
-```txt
-SHARED_PASSWORD=كلمة_مرور_مشتركة
-JWT_SECRET=نص_سري_طويل
-```
-
-عادة لا تحتاج إلى إضافة `siteID` أو `token` عند النشر داخل Netlify. لكن إذا أردت التشغيل اليدوي خارج Netlify، يمكنك إضافة:
-
-```txt
-NETLIFY_SITE_ID=Project ID من Netlify
-NETLIFY_AUTH_TOKEN=Personal Access Token من Netlify
-```
-
+هذا المشروع لا يحتوي على تسجيل دخول، ولا يستخدم قاعدة بيانات خارجية. الهدف منه اختبار Netlify Blobs فقط.

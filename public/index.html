@@ -3,145 +3,296 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>لوحة المهام المشتركة</title>
-  <meta name="description" content="لوحة مهام مشتركة بسيطة تعمل على Netlify بكلمة مرور واحدة" />
-  <link rel="stylesheet" href="/styles.css" />
+  <title>اختبار Netlify Blobs</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --danger: #dc2626;
+      --success: #059669;
+      --warning: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Tahoma, Arial, sans-serif;
+      background: linear-gradient(135deg, #f8fafc, #e0f2fe);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .app {
+      width: min(860px, 100%);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+    }
+
+    header {
+      padding: 28px;
+      background: #0f172a;
+      color: white;
+    }
+
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 0;
+      color: #cbd5e1;
+      line-height: 1.8;
+    }
+
+    main {
+      padding: 28px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      background: #ffffff;
+    }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      font: inherit;
+      line-height: 1.7;
+      outline: none;
+    }
+
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .secondary {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .danger {
+      background: #fee2e2;
+      color: var(--danger);
+    }
+
+    .status {
+      min-height: 28px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .status.success {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    .status.error {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      direction: ltr;
+      text-align: left;
+      background: #0b1220;
+      color: #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      line-height: 1.7;
+      overflow: auto;
+      min-height: 180px;
+    }
+
+    .hint {
+      color: var(--muted);
+      line-height: 1.9;
+      margin: 0;
+    }
+
+    code {
+      direction: ltr;
+      unicode-bidi: embed;
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 7px;
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 12px;
+      }
+
+      header, main {
+        padding: 20px;
+      }
+
+      header h1 {
+        font-size: 24px;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-  <main class="app-shell">
-    <section id="loginView" class="login-view hidden">
-      <div class="login-card">
-        <div class="brand-mark">مهام</div>
-        <h1>لوحة المهام المشتركة</h1>
-        <p>أدخل كلمة المرور المشتركة للدخول وإدارة المهام.</p>
-        <form id="loginForm" class="login-form">
-          <label for="passwordInput">كلمة المرور</label>
-          <input id="passwordInput" name="password" type="password" placeholder="اكتب كلمة المرور" autocomplete="current-password" required />
-          <button type="submit" class="primary-btn">دخول</button>
-        </form>
-        <p id="loginError" class="form-error" role="alert"></p>
-      </div>
-    </section>
+  <div class="app">
+    <header>
+      <h1>اختبار Netlify Blobs</h1>
+      <p>مشروع صغير جدًا للتأكد من أن الحفظ والقراءة والحذف تعمل داخل Netlify Blobs قبل استخدامه في الداشبورد.</p>
+    </header>
 
-    <section id="dashboardView" class="dashboard-view hidden">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">داشبورد بسيط</p>
-          <h1>لوحة المهام المشتركة</h1>
-          <p class="muted">أي شخص يملك كلمة المرور يستطيع إضافة وتعديل وحذف أي مهمة.</p>
-        </div>
-        <div class="topbar-actions">
-          <button id="refreshBtn" class="ghost-btn" type="button">تحديث</button>
-          <button id="logoutBtn" class="ghost-btn" type="button">خروج</button>
-          <button id="openAddTaskBtn" class="primary-btn" type="button">إضافة مهمة</button>
-        </div>
-      </header>
-
-      <section class="stats-grid" aria-label="إحصائيات المهام">
-        <article class="stat-card">
-          <span>كل المهام</span>
-          <strong id="totalCount">0</strong>
-        </article>
-        <article class="stat-card">
-          <span>تحت التنفيذ</span>
-          <strong id="inProgressCount">0</strong>
-        </article>
-        <article class="stat-card">
-          <span>معلق</span>
-          <strong id="pendingCount">0</strong>
-        </article>
-        <article class="stat-card">
-          <span>مكتمل</span>
-          <strong id="completedCount">0</strong>
-        </article>
-      </section>
-
-      <section class="toolbar">
-        <label class="search-box" for="searchInput">
-          <span>بحث</span>
-          <input id="searchInput" type="search" placeholder="ابحث بعنوان المهمة أو الوصف" />
-        </label>
-        <label class="filter-box" for="dateFilter">
-          <span>فلترة التاريخ</span>
-          <select id="dateFilter">
-            <option value="all">كل المهام</option>
-            <option value="today">تسليم اليوم</option>
-            <option value="late">متأخرة</option>
-            <option value="week">خلال 7 أيام</option>
-          </select>
-        </label>
-      </section>
-
-      <p id="statusMessage" class="status-message" role="status"></p>
-
-      <section class="board" aria-label="لوحة المهام">
-        <div class="column" data-status="in_progress">
-          <div class="column-header">
-            <h2>تحت التنفيذ</h2>
-            <span id="columnInProgress">0</span>
-          </div>
-          <div id="inProgressList" class="task-list"></div>
-        </div>
-
-        <div class="column" data-status="pending">
-          <div class="column-header">
-            <h2>معلق</h2>
-            <span id="columnPending">0</span>
-          </div>
-          <div id="pendingList" class="task-list"></div>
-        </div>
-
-        <div class="column" data-status="completed">
-          <div class="column-header">
-            <h2>مكتمل</h2>
-            <span id="columnCompleted">0</span>
-          </div>
-          <div id="completedList" class="task-list"></div>
+    <main>
+      <section class="panel">
+        <label for="message">النص المراد حفظه</label>
+        <textarea id="message" placeholder="اكتب أي نص ثم اضغط حفظ في Blobs">تجربة حفظ بيانات في Netlify Blobs</textarea>
+        <div class="actions">
+          <button class="primary" id="saveBtn">حفظ في Blobs</button>
+          <button class="secondary" id="readBtn">قراءة من Blobs</button>
+          <button class="danger" id="deleteBtn">حذف من Blobs</button>
         </div>
       </section>
-    </section>
-  </main>
 
-  <dialog id="taskDialog" class="task-dialog">
-    <form id="taskForm" method="dialog" class="task-form">
-      <div class="dialog-header">
-        <div>
-          <p class="eyebrow">مهمة</p>
-          <h2 id="dialogTitle">إضافة مهمة</h2>
-        </div>
-        <button id="closeDialogBtn" class="icon-btn" type="button" aria-label="إغلاق">×</button>
-      </div>
+      <section class="panel">
+        <p class="status" id="status">جاهز للاختبار.</p>
+        <pre id="output">لم يتم تنفيذ أي طلب بعد.</pre>
+      </section>
 
-      <input id="taskId" type="hidden" />
+      <section class="panel">
+        <p class="hint">
+          مسار الاختبار هو <code>/api/blob-test</code> ويتم تحويله تلقائيًا إلى <code>/.netlify/functions/blob-test</code> من خلال ملف <code>netlify.toml</code>.
+        </p>
+      </section>
+    </main>
+  </div>
 
-      <label for="taskTitle">عنوان المهمة</label>
-      <input id="taskTitle" type="text" maxlength="120" placeholder="مثال: إعداد تقرير أسبوعي" required />
+  <script>
+    const apiUrl = "/api/blob-test";
+    const messageInput = document.getElementById("message");
+    const output = document.getElementById("output");
+    const statusEl = document.getElementById("status");
+    const buttons = Array.from(document.querySelectorAll("button"));
 
-      <label for="taskDescription">وصف مختصر</label>
-      <textarea id="taskDescription" rows="4" maxlength="500" placeholder="اكتب وصفًا مختصرًا للمهمة"></textarea>
+    function setLoading(isLoading) {
+      buttons.forEach((button) => {
+        button.disabled = isLoading;
+      });
+    }
 
-      <div class="form-row">
-        <label for="taskDueDate">
-          <span>تاريخ التسليم</span>
-          <input id="taskDueDate" type="date" required />
-        </label>
-        <label for="taskStatus">
-          <span>الحالة</span>
-          <select id="taskStatus" required>
-            <option value="in_progress">تحت التنفيذ</option>
-            <option value="pending">معلق</option>
-            <option value="completed">مكتمل</option>
-          </select>
-        </label>
-      </div>
+    function setStatus(message, type = "") {
+      statusEl.textContent = message;
+      statusEl.className = type ? `status ${type}` : "status";
+    }
 
-      <div class="dialog-actions">
-        <button id="cancelTaskBtn" class="ghost-btn" type="button">إلغاء</button>
-        <button class="primary-btn" type="submit">حفظ المهمة</button>
-      </div>
-    </form>
-  </dialog>
+    function showJson(data) {
+      output.textContent = JSON.stringify(data, null, 2);
+    }
 
-  <script src="/app.js" defer></script>
+    async function requestApi(method, body) {
+      setLoading(true);
+      setStatus("جاري تنفيذ الطلب...");
+
+      try {
+        const response = await fetch(apiUrl, {
+          method,
+          headers: body ? { "content-type": "application/json" } : undefined,
+          body: body ? JSON.stringify(body) : undefined
+        });
+
+        const data = await response.json();
+        showJson(data);
+
+        if (!response.ok || !data.ok) {
+          setStatus(data.error || "حدث خطأ أثناء الاختبار.", "error");
+          return;
+        }
+
+        setStatus(data.note || "تم تنفيذ العملية بنجاح.", "success");
+      } catch (error) {
+        showJson({ ok: false, error: error.message });
+        setStatus("تعذر الاتصال بالـ Function. تأكد أن الموقع منشور على Netlify.", "error");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", () => {
+      requestApi("POST", { message: messageInput.value });
+    });
+
+    document.getElementById("readBtn").addEventListener("click", () => {
+      requestApi("GET");
+    });
+
+    document.getElementById("deleteBtn").addEventListener("click", () => {
+      requestApi("DELETE");
+    });
+  </script>
 </body>
 </html>

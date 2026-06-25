@@ -1,17 +1,13 @@
 {
-  "name": "netlify-shared-task-dashboard",
+  "name": "netlify-blobs-test",
   "version": "1.0.0",
-  "private": true,
-  "description": "Simple Arabic shared task dashboard for Netlify Functions and Netlify Blobs",
+  "description": "Simple Netlify Blobs test project",
+  "type": "module",
   "scripts": {
-    "dev": "netlify dev",
-    "start": "netlify dev"
+    "build": "node -e \"console.log('No build step needed. Static files are in public/.')\""
   },
   "dependencies": {
     "@netlify/blobs": "latest"
-  },
-  "devDependencies": {
-    "netlify-cli": "latest"
   },
   "engines": {
     "node": ">=18"
