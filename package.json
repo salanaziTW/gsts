@@ -1,0 +1,19 @@
+{
+  "name": "netlify-shared-task-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Simple Arabic shared task dashboard for Netlify Functions and Netlify Blobs",
+  "scripts": {
+    "dev": "netlify dev",
+    "start": "netlify dev"
+  },
+  "dependencies": {
+    "@netlify/blobs": "latest"
+  },
+  "devDependencies": {
+    "netlify-cli": "latest"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

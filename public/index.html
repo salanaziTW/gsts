@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة المهام المشتركة</title>
+  <meta name="description" content="لوحة مهام مشتركة بسيطة تعمل على Netlify بكلمة مرور واحدة" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section id="loginView" class="login-view hidden">
+      <div class="login-card">
+        <div class="brand-mark">مهام</div>
+        <h1>لوحة المهام المشتركة</h1>
+        <p>أدخل كلمة المرور المشتركة للدخول وإدارة المهام.</p>
+        <form id="loginForm" class="login-form">
+          <label for="passwordInput">كلمة المرور</label>
+          <input id="passwordInput" name="password" type="password" placeholder="اكتب كلمة المرور" autocomplete="current-password" required />
+          <button type="submit" class="primary-btn">دخول</button>
+        </form>
+        <p id="loginError" class="form-error" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="dashboardView" class="dashboard-view hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">داشبورد بسيط</p>
+          <h1>لوحة المهام المشتركة</h1>
+          <p class="muted">أي شخص يملك كلمة المرور يستطيع إضافة وتعديل وحذف أي مهمة.</p>
+        </div>
+        <div class="topbar-actions">
+          <button id="refreshBtn" class="ghost-btn" type="button">تحديث</button>
+          <button id="logoutBtn" class="ghost-btn" type="button">خروج</button>
+          <button id="openAddTaskBtn" class="primary-btn" type="button">إضافة مهمة</button>
+        </div>
+      </header>
+
+      <section class="stats-grid" aria-label="إحصائيات المهام">
+        <article class="stat-card">
+          <span>كل المهام</span>
+          <strong id="totalCount">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>تحت التنفيذ</span>
+          <strong id="inProgressCount">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>معلق</span>
+          <strong id="pendingCount">0</strong>
+        </article>
+        <article class="stat-card">
+          <span>مكتمل</span>
+          <strong id="completedCount">0</strong>
+        </article>
+      </section>
+
+      <section class="toolbar">
+        <label class="search-box" for="searchInput">
+          <span>بحث</span>
+          <input id="searchInput" type="search" placeholder="ابحث بعنوان المهمة أو الوصف" />
+        </label>
+        <label class="filter-box" for="dateFilter">
+          <span>فلترة التاريخ</span>
+          <select id="dateFilter">
+            <option value="all">كل المهام</option>
+            <option value="today">تسليم اليوم</option>
+            <option value="late">متأخرة</option>
+            <option value="week">خلال 7 أيام</option>
+          </select>
+        </label>
+      </section>
+
+      <p id="statusMessage" class="status-message" role="status"></p>
+
+      <section class="board" aria-label="لوحة المهام">
+        <div class="column" data-status="in_progress">
+          <div class="column-header">
+            <h2>تحت التنفيذ</h2>
+            <span id="columnInProgress">0</span>
+          </div>
+          <div id="inProgressList" class="task-list"></div>
+        </div>
+
+        <div class="column" data-status="pending">
+          <div class="column-header">
+            <h2>معلق</h2>
+            <span id="columnPending">0</span>
+          </div>
+          <div id="pendingList" class="task-list"></div>
+        </div>
+
+        <div class="column" data-status="completed">
+          <div class="column-header">
+            <h2>مكتمل</h2>
+            <span id="columnCompleted">0</span>
+          </div>
+          <div id="completedList" class="task-list"></div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="taskDialog" class="task-dialog">
+    <form id="taskForm" method="dialog" class="task-form">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">مهمة</p>
+          <h2 id="dialogTitle">إضافة مهمة</h2>
+        </div>
+        <button id="closeDialogBtn" class="icon-btn" type="button" aria-label="إغلاق">×</button>
+      </div>
+
+      <input id="taskId" type="hidden" />
+
+      <label for="taskTitle">عنوان المهمة</label>
+      <input id="taskTitle" type="text" maxlength="120" placeholder="مثال: إعداد تقرير أسبوعي" required />
+
+      <label for="taskDescription">وصف مختصر</label>
+      <textarea id="taskDescription" rows="4" maxlength="500" placeholder="اكتب وصفًا مختصرًا للمهمة"></textarea>
+
+      <div class="form-row">
+        <label for="taskDueDate">
+          <span>تاريخ التسليم</span>
+          <input id="taskDueDate" type="date" required />
+        </label>
+        <label for="taskStatus">
+          <span>الحالة</span>
+          <select id="taskStatus" required>
+            <option value="in_progress">تحت التنفيذ</option>
+            <option value="pending">معلق</option>
+            <option value="completed">مكتمل</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="dialog-actions">
+        <button id="cancelTaskBtn" class="ghost-btn" type="button">إلغاء</button>
+        <button class="primary-btn" type="submit">حفظ المهمة</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
