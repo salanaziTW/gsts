@@ -1,37 +1,38 @@
 # لوحة المهام المشتركة على Netlify
 
-مشروع بسيط جدًا لإدارة المهام باستخدام:
+نسخة بسيطة لإدارة المهام باستخدام:
 
 - صفحة HTML واحدة
 - Netlify Functions
 - Netlify Blobs
 - كلمة مرور مشتركة واحدة
 
-لا توجد حسابات مستخدمين، ولا صلاحيات، ولا قاعدة بيانات خارجية.
-كل شخص يملك كلمة المرور يستطيع مشاهدة وإضافة وتعديل وحذف كل المهام.
+## مهم جدًا
 
-## الملفات
+هذه النسخة تستخدم طريقتين للدخول:
+
+1. ترجع دالة تسجيل الدخول توكن للواجهة ويتم حفظه في `localStorage`.
+2. وتضع كوكي كدعم إضافي.
+
+هذا يجعل الدخول أكثر ثباتًا إذا لم يعمل الكوكي في بعض المتصفحات أو الإعدادات.
+
+## طريقة النشر
+
+1. ارفع ملفات المشروع إلى GitHub.
+2. اربط المستودع مع Netlify.
+3. تأكد أن الإعدادات كالتالي:
 
 ```txt
-public/index.html
-netlify/functions/auth.mjs
-netlify/functions/tasks.mjs
-netlify.toml
-package.json
-.env.example
+Build command: npm run build
+Publish directory: public
+Functions directory: netlify/functions
 ```
 
-## كلمة المرور الافتراضية
+أو اترك Netlify يقرأها من `netlify.toml`.
 
-```txt
-team123
-```
+## متغيرات البيئة
 
-لا تستخدمها في التشغيل الفعلي. غيّرها من Netlify Environment Variables.
-
-## متغيرات البيئة المطلوبة
-
-من داخل Netlify:
+من Netlify:
 
 ```txt
 Project configuration > Environment variables
@@ -40,95 +41,44 @@ Project configuration > Environment variables
 أضف:
 
 ```txt
-SHARED_PASSWORD=اكتب_كلمة_مرور_قوية
-JWT_SECRET=اكتب_نص_سري_طويل_وعشوائي
+SHARED_PASSWORD=كلمة_مرور_قوية
+JWT_SECRET=نص_سري_طويل_وعشوائي
 ```
 
-مثال:
+بعد إضافة المتغيرات نفذ:
 
 ```txt
-SHARED_PASSWORD=MyTeamPassword2026
-JWT_SECRET=my-long-random-secret-change-this-987654321
+Deploys > Trigger deploy > Clear cache and deploy site
 ```
 
-## مهم جدًا بخصوص Netlify Blobs
+## كلمة المرور الافتراضية
 
-لا تضف هذه المتغيرات إلا إذا كنت تعرف لماذا تحتاجها:
+إذا لم تضف `SHARED_PASSWORD`، ستكون كلمة المرور:
 
 ```txt
-NETLIFY_SITE_ID
-NETLIFY_AUTH_TOKEN
+team123
 ```
 
-إذا ظهرت لديك أخطاء 401 في Netlify Blobs، احذف المتغيرين أعلاه إن كانا موجودين، ثم أعد النشر من جديد.
-هذه النسخة تعتمد على التهيئة التلقائية داخل Netlify Functions.
+لا تستخدمها في التشغيل الفعلي.
 
-## طريقة النشر عبر GitHub
+## إذا لم تعمل صفحة الدخول
 
-1. فك ضغط الملف.
-2. أنشئ مستودع GitHub جديد.
-3. ارفع محتويات المجلد إلى المستودع.
-4. افتح Netlify.
-5. اختر Add new project.
-6. اختر Import from GitHub.
-7. اختر المستودع.
-8. تأكد من الإعدادات:
+افتح الرابط التالي مباشرة بعد استبدال نطاق موقعك:
 
 ```txt
-Build command: npm run build
-Publish directory: public
-Functions directory: netlify/functions
+https://YOUR-SITE.netlify.app/.netlify/functions/auth
 ```
 
-9. اضغط Deploy.
-10. أضف Environment Variables:
+إذا ظهرت استجابة JSON فهذا يعني أن الدالة تعمل.
+
+ثم جرّب:
 
 ```txt
-SHARED_PASSWORD
-JWT_SECRET
+https://YOUR-SITE.netlify.app/api/auth
 ```
 
-11. من تبويب Deploys اختر:
+إذا الرابط الأول يعمل والثاني لا يعمل، فالمشكلة في redirects أو في أن `netlify.toml` ليس في جذر المشروع.
 
-```txt
-Trigger deploy > Clear cache and deploy site
-```
+## ملاحظات
 
-12. افتح الموقع وسجل الدخول.
-
-## وظائف الداشبورد
-
-- تسجيل دخول بكلمة مرور مشتركة
-- إضافة مهمة
-- تعديل مهمة
-- حذف مهمة
-- تغيير الحالة من الكرت مباشرة
-- البحث في العنوان والوصف
-- عرض المهام في 3 أعمدة:
-  - تحت التنفيذ
-  - معلق
-  - مكتمل
-- عداد للمهام المتأخرة حسب تاريخ التسليم
-
-## حالات المهمة
-
-```txt
-in_progress = تحت التنفيذ
-pending = معلق
-completed = مكتمل
-```
-
-## API الداخلي
-
-```txt
-GET    /api/auth
-POST   /api/auth
-GET    /api/tasks
-POST   /api/tasks
-PATCH  /api/tasks
-DELETE /api/tasks?id=TASK_ID
-```
-
-## ملاحظة مهمة
-
-هذا المشروع مناسب لفريق صغير واستخدام بسيط. إذا أصبح عدد المستخدمين كبيرًا أو أصبحت التعديلات متزامنة بكثافة، يفضل الانتقال لاحقًا إلى Supabase أو قاعدة Postgres.
+لا تضف `NETLIFY_SITE_ID` ولا `NETLIFY_AUTH_TOKEN` إلا إذا كنت تستخدم Blobs من خارج Netlify Functions. هذه النسخة تستخدم التهيئة التلقائية داخل Netlify.

@@ -421,6 +421,13 @@
       line-height: 1.7;
     }
 
+    .hint.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border-color: #fecaca;
+      font-weight: 800;
+    }
+
     .footer-note {
       margin-top: 18px;
       color: var(--muted);
@@ -460,6 +467,7 @@
         </div>
         <button class="btn" type="submit">دخول</button>
       </form>
+      <div id="loginError" class="hint error hidden"></div>
       <div class="hint">كلمة المرور الافتراضية للتجربة هي <strong>team123</strong>. غيّرها من Netlify Environment Variables باسم <strong>SHARED_PASSWORD</strong>.</div>
     </section>
   </div>
@@ -582,6 +590,7 @@
       loginOverlay: document.getElementById('loginOverlay'),
       loginForm: document.getElementById('loginForm'),
       password: document.getElementById('password'),
+      loginError: document.getElementById('loginError'),
       taskModal: document.getElementById('taskModal'),
       modalTitle: document.getElementById('modalTitle'),
       taskForm: document.getElementById('taskForm'),
@@ -620,29 +629,66 @@
       showToast.timer = window.setTimeout(() => els.toast.classList.add('hidden'), 3200);
     }
 
+    const TOKEN_KEY = 'simple_tasks_session_token';
+
+    function getToken() {
+      return localStorage.getItem(TOKEN_KEY) || '';
+    }
+
+    function setToken(token) {
+      if (token) localStorage.setItem(TOKEN_KEY, token);
+    }
+
+    function clearToken() {
+      localStorage.removeItem(TOKEN_KEY);
+    }
+
+    function resolveApiPaths(path) {
+      if (path === '/api/auth') return ['/api/auth', '/.netlify/functions/auth'];
+      if (path === '/api/tasks') return ['/api/tasks', '/.netlify/functions/tasks'];
+      return [path];
+    }
+
     async function api(path, options = {}) {
-      const res = await fetch(path, {
-        credentials: 'same-origin',
-        headers: { 'content-type': 'application/json', ...(options.headers || {}) },
-        ...options
-      });
+      const paths = resolveApiPaths(path);
+      let lastError;
 
-      let data;
-      try {
-        data = await res.json();
-      } catch {
-        data = { ok: false, error: 'تعذر قراءة استجابة الخادم.' };
+      for (const currentPath of paths) {
+        try {
+          const token = getToken();
+          const headers = { 'content-type': 'application/json', ...(options.headers || {}) };
+          if (token) headers.authorization = `Bearer ${token}`;
+
+          const res = await fetch(currentPath, {
+            credentials: 'same-origin',
+            headers,
+            ...options
+          });
+
+          let data;
+          try {
+            data = await res.json();
+          } catch {
+            data = { ok: false, error: 'تعذر قراءة استجابة الخادم. تأكد أن Netlify Functions منشورة وأن netlify.toml موجود في جذر المشروع.' };
+          }
+
+          if (!res.ok || data.ok === false) {
+            const message = data.error || `حدث خطأ غير متوقع. كود: ${res.status}`;
+            throw new Error(message);
+          }
+
+          return data;
+        } catch (error) {
+          lastError = error;
+          // جرّب مسار الدالة المباشر إذا كان مسار /api لا يعمل.
+        }
       }
 
-      if (!res.ok || data.ok === false) {
-        const message = data.error || `حدث خطأ غير متوقع. كود: ${res.status}`;
-        throw new Error(message);
-      }
-
-      return data;
+      throw lastError || new Error('تعذر الاتصال بالخادم.');
     }
 
     function openLogin() {
+      els.loginError.classList.add('hidden');
       els.loginOverlay.classList.remove('hidden');
       setTimeout(() => els.password.focus(), 50);
     }
@@ -650,6 +696,7 @@
     function closeLogin() {
       els.loginOverlay.classList.add('hidden');
       els.password.value = '';
+      els.loginError.classList.add('hidden');
     }
 
     function openTaskModal(task = null) {
@@ -779,9 +826,11 @@
           closeLogin();
           await loadTasks();
         } else {
+          clearToken();
           openLogin();
         }
       } catch (error) {
+        clearToken();
         openLogin();
       }
     }
@@ -793,7 +842,7 @@
         state.summary = data.summary || state.summary;
         render(data.updatedAt);
       } catch (error) {
-        if (String(error.message).includes('غير مصرح')) openLogin();
+        if (String(error.message).includes('غير مصرح')) { clearToken(); openLogin(); }
         showToast(error.message, 'error');
       }
     }
@@ -867,17 +916,24 @@
 
     async function login(event) {
       event.preventDefault();
+      els.loginError.classList.add('hidden');
+
       try {
         const data = await api('/api/auth', {
           method: 'POST',
-          body: JSON.stringify({ password: els.password.value })
+          body: JSON.stringify({ password: els.password.value.trim() })
         });
         if (data.authenticated) {
+          setToken(data.token);
           closeLogin();
           showToast('تم تسجيل الدخول.');
           await loadTasks();
+        } else {
+          throw new Error('لم يتم قبول تسجيل الدخول.');
         }
       } catch (error) {
+        els.loginError.textContent = error.message || 'تعذر تسجيل الدخول.';
+        els.loginError.classList.remove('hidden');
         showToast(error.message, 'error');
       }
     }
@@ -889,6 +945,7 @@
           body: JSON.stringify({ action: 'logout' })
         });
       } catch {}
+      clearToken();
       state.tasks = [];
       render();
       openLogin();

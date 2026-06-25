@@ -79,7 +79,7 @@ function verifySessionToken(token) {
 }
 
 function authCookie(value, maxAge) {
-  // HttpOnly يمنع JavaScript من قراءة الكوكي، وهذا أفضل من تخزين كلمة المرور في الواجهة.
+  // نُبقي الكوكي كدعم إضافي، لكن الواجهة ستستخدم التوكن من localStorage حتى لا يتوقف الدخول بسبب مشاكل الكوكي.
   return `${COOKIE_NAME}=${encodeURIComponent(value)}; Path=/; Max-Age=${maxAge}; HttpOnly; SameSite=Lax`;
 }
 
@@ -105,15 +105,15 @@ export default async function handler(request) {
     }
 
     const sharedPassword = process.env.SHARED_PASSWORD || "team123";
-    const password = String(body.password || "");
+    const password = String(body.password || "").trim();
 
-    if (password !== sharedPassword) {
+    if (password !== String(sharedPassword).trim()) {
       return jsonResponse({ ok: false, error: "كلمة المرور غير صحيحة." }, 401);
     }
 
     const token = createSessionToken();
     return jsonResponse(
-      { ok: true, authenticated: true, message: "تم تسجيل الدخول بنجاح." },
+      { ok: true, authenticated: true, token, message: "تم تسجيل الدخول بنجاح." },
       200,
       { "set-cookie": authCookie(token, SESSION_DAYS * 24 * 60 * 60) }
     );
