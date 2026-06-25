@@ -7,6 +7,11 @@
   node_bundler = "esbuild"
 
 [[redirects]]
-  from = "/api/blob-test"
-  to = "/.netlify/functions/blob-test"
+  from = "/api/auth"
+  to = "/.netlify/functions/auth"
+  status = 200
+
+[[redirects]]
+  from = "/api/tasks"
+  to = "/.netlify/functions/tasks"
   status = 200
