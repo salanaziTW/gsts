@@ -131,3 +131,44 @@ netlify-shared-task-dashboard/
 ## تنبيه أمني بسيط
 
 هذا النظام بسيط ومناسب لفريق صغير. لا تستخدمه لتخزين معلومات حساسة جدًا. كل من يعرف كلمة المرور يستطيع إدارة كل المهام.
+
+## إصلاح خطأ Netlify Blobs Environment
+
+إذا ظهرت الرسالة التالية:
+
+```txt
+The environment has not been configured to use Netlify Blobs. To use it manually, supply the following properties when creating a store: siteID, token
+```
+
+فالسبب غالبًا أن Netlify Functions تعمل بصيغة Lambda compatibility، وفي هذه الحالة يجب تهيئة Netlify Blobs داخل الدالة قبل استخدام `getStore`. تم تعديل ملف:
+
+```txt
+netlify/functions/tasks.js
+```
+
+ليستخدم `connectLambda(event)` تلقائيًا داخل الدالة.
+
+### خطوات الإصلاح بعد رفع هذه النسخة
+
+1. ارفع النسخة الجديدة إلى GitHub بدل القديمة.
+2. ادخل إلى Netlify.
+3. افتح تبويب Deploys.
+4. اضغط Trigger deploy ثم Deploy site.
+5. جرّب إضافة مهمة جديدة.
+
+### إعدادات Environment Variables المطلوبة
+
+تأكد من وجود:
+
+```txt
+SHARED_PASSWORD=كلمة_مرور_مشتركة
+JWT_SECRET=نص_سري_طويل
+```
+
+عادة لا تحتاج إلى إضافة `siteID` أو `token` عند النشر داخل Netlify. لكن إذا أردت التشغيل اليدوي خارج Netlify، يمكنك إضافة:
+
+```txt
+NETLIFY_SITE_ID=Project ID من Netlify
+NETLIFY_AUTH_TOKEN=Personal Access Token من Netlify
+```
+

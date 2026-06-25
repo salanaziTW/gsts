@@ -56,19 +56,41 @@ function verifyToken(authHeader) {
   return payload.role === 'shared-user' && Number(payload.exp) > Date.now();
 }
 
-async function getStore() {
+async function getStore(event) {
   const blobs = await import('@netlify/blobs');
-  return blobs.getStore({ name: STORE_NAME, consistency: 'strong' });
+
+  // Important for Netlify Functions v1 / Lambda compatibility mode.
+  // Without this, Netlify Blobs may throw: MissingBlobsEnvironmentError.
+  if (typeof blobs.connectLambda === 'function' && event) {
+    blobs.connectLambda(event);
+  }
+
+  const storeOptions = {
+    name: STORE_NAME,
+    consistency: 'strong'
+  };
+
+  // Optional fallback for local/manual usage only.
+  // In normal Netlify deploys, connectLambda(event) is enough.
+  const manualSiteID = process.env.NETLIFY_SITE_ID || process.env.SITE_ID;
+  const manualToken = process.env.NETLIFY_AUTH_TOKEN || process.env.NETLIFY_API_TOKEN || process.env.NETLIFY_TOKEN || process.env.BLOBS_TOKEN;
+
+  if (manualSiteID && manualToken) {
+    storeOptions.siteID = manualSiteID;
+    storeOptions.token = manualToken;
+  }
+
+  return blobs.getStore(storeOptions);
 }
 
-async function readTasks() {
-  const store = await getStore();
+async function readTasks(event) {
+  const store = await getStore(event);
   const saved = await store.get(TASKS_KEY, { type: 'json' });
   return Array.isArray(saved) ? saved : [];
 }
 
-async function writeTasks(tasks) {
-  const store = await getStore();
+async function writeTasks(event, tasks) {
+  const store = await getStore(event);
   await store.setJSON(TASKS_KEY, tasks);
 }
 
@@ -123,7 +145,7 @@ exports.handler = async (event) => {
 
   try {
     if (event.httpMethod === 'GET') {
-      const tasks = await readTasks();
+      const tasks = await readTasks(event);
       return json(200, { tasks: sortTasks(tasks) });
     }
 
@@ -137,9 +159,9 @@ exports.handler = async (event) => {
       task.createdAt = now;
       task.updatedAt = now;
 
-      const tasks = await readTasks();
+      const tasks = await readTasks(event);
       const nextTasks = [task, ...tasks];
-      await writeTasks(nextTasks);
+      await writeTasks(event, nextTasks);
 
       return json(201, { task });
     }
@@ -151,7 +173,7 @@ exports.handler = async (event) => {
       const id = String(body.id || '').trim();
       if (!id) return json(400, { message: 'معرف المهمة مطلوب.' });
 
-      const tasks = await readTasks();
+      const tasks = await readTasks(event);
       const index = tasks.findIndex((task) => task.id === id);
       if (index === -1) return json(404, { message: 'المهمة غير موجودة.' });
 
@@ -162,7 +184,7 @@ exports.handler = async (event) => {
 
       const nextTasks = [...tasks];
       nextTasks[index] = updated;
-      await writeTasks(nextTasks);
+      await writeTasks(event, nextTasks);
 
       return json(200, { task: updated });
     }
@@ -171,14 +193,14 @@ exports.handler = async (event) => {
       const id = String(event.queryStringParameters?.id || '').trim();
       if (!id) return json(400, { message: 'معرف المهمة مطلوب.' });
 
-      const tasks = await readTasks();
+      const tasks = await readTasks(event);
       const nextTasks = tasks.filter((task) => task.id !== id);
 
       if (nextTasks.length === tasks.length) {
         return json(404, { message: 'المهمة غير موجودة.' });
       }
 
-      await writeTasks(nextTasks);
+      await writeTasks(event, nextTasks);
       return json(200, { ok: true });
     }
 
